@@ -3,15 +3,15 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.InputSystem;
 
-public class UnitController : MonoBehaviour
+public class UnitManager : MonoBehaviour
 {
     [SerializeField] private Camera _camera;
     [SerializeField] private RaycastHit _raycastHit;
 
-    [SerializeField] private List<NavMeshAgent> _selectUnits = new();
-    private NavMeshAgent[] _agents;
-    [SerializeField]private NavMeshAgent _selectUnit;
+    [SerializeField] private List<Unit> _selectUnits = new();
+    private Unit[] _agents;
     private Vector3 _targetPosition;
+    [SerializeField] internal float _relativeDistance;
 
     private Vector2 _startMousePosition;
     private Vector2 _endMousePosition;
@@ -20,7 +20,7 @@ public class UnitController : MonoBehaviour
 
     private void Start()
     {
-        _agents = FindObjectsByType<NavMeshAgent>(FindObjectsSortMode.InstanceID);
+        _agents = FindObjectsByType<Unit>(FindObjectsSortMode.InstanceID);
     }
 
     public void OnClick(InputAction.CallbackContext context)
@@ -35,9 +35,16 @@ public class UnitController : MonoBehaviour
         {
             switch (_raycastHit.collider.gameObject.tag)
             {
-                //case "Player":
-                //    _selectUnit = _raycastHit.collider.gameObject.GetComponent<NavMeshAgent>();
-                //    break;
+                case "Player":
+                    if (_raycastHit.collider.gameObject.TryGetComponent<Unit>(out var unit))
+                    {
+                        if (_selectUnits.Contains(unit))
+                        {
+                            return;
+                        }
+                        _selectUnits.Add(unit);
+                    }
+                    break;
                 case "Ground":
                     MoveTargetPosition(_raycastHit);
                     break;
@@ -66,9 +73,12 @@ public class UnitController : MonoBehaviour
 
     private void FIndSelectionsUnit(Rect selection)
     {
-        _selectUnits.Clear();
         foreach (var agent in _agents)
         {
+            if (_selectUnits.Contains(agent))
+            {
+                return;
+            }
             var screenPos = _camera.WorldToScreenPoint(agent.transform.position);
             if (selection.Contains(new Vector2(screenPos.x, screenPos.y)))
             {
@@ -87,28 +97,17 @@ public class UnitController : MonoBehaviour
         var mousePosition = new Vector3(Mouse.current.position.x.value, Mouse.current.position.y.value, distance);
         _targetPosition = _camera.ScreenToWorldPoint(mousePosition);
 
-        if (_selectUnit != null)
+        if (_selectUnits.Count > 0)
         {
-            _targetPosition.y = _selectUnit.transform.position.y;
-            _selectUnit.SetDestination(_targetPosition);
-            _selectUnit = null;
-        }
-
-        if(_selectUnits.Count > 0)
-        {
-            foreach(var agent in _selectUnits)
+            var character = _selectUnits[0];
+            character.SetTargetPosition(_targetPosition);
+            for (int i = 1; i < _selectUnits.Count; i++)
             {
-                _targetPosition.y = agent.transform.position.y;
-                agent.SetDestination(_targetPosition);
+                _selectUnits[i].SetCharacter(character.gameObject);
+                _selectUnits[i].SetTargetPosition(_targetPosition);
+                character = _selectUnits[i];
             }
-        }
-    }
-
-    private void OnGUI()
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-            GUI.Box(selectionRect, "");
+            _selectUnits.Clear();
         }
     }
 }
