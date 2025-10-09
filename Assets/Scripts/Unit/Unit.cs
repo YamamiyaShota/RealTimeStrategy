@@ -3,20 +3,39 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class Unit : MonoBehaviour
+public class Unit : MonoBehaviour, IUnit
 {
-    private GameObject _character;
-    private NavMeshAgent _agent;
+    [Header("ステータス")]
+    [SerializeField] private int _hp;
+    [SerializeField] private int _atk;
+    [SerializeField] private int _df;
+    [SerializeField] private float _attackInterval;
+    [SerializeField] private float _moveSpeed;
+    [SerializeField] private float _attackRange;
 
+    [Header("AI設定")]
+    [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private float _arraivedDistance = 1.5f;
     [SerializeField] private float _followDistance = 1;
 
+
+    public int HP => _hp;
+    public int ATK => _atk;
+    public int DF => _df;
+    public float AttackInterval => _attackInterval;
+    public float MoveSpeed => _moveSpeed;
+    public float AttackRange => _attackRange;
+
+    private GameObject _character;
     private Vector3 _targetPosition;
 
     private void Start()
     {
         _targetPosition = transform.position;
-        _agent = GetComponent<NavMeshAgent>();
+        if(_agent == null)
+        {
+            _agent = GetComponent<NavMeshAgent>();
+        }
     }
 
     private void Update()
@@ -49,5 +68,10 @@ public class Unit : MonoBehaviour
     public void SetTargetPosition(Vector3 targetPosition)
     {
         _targetPosition = targetPosition;
+    }
+
+    public void AddDamage(int atk)
+    {
+        _hp -= atk - _df;
     }
 }

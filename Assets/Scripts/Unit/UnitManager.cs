@@ -11,7 +11,6 @@ public class UnitManager : MonoBehaviour
     [SerializeField] private List<Unit> _selectUnits = new();
     private Unit[] _agents;
     private Vector3 _targetPosition;
-    [SerializeField] internal float _relativeDistance;
 
     private Vector2 _startMousePosition;
     private Vector2 _endMousePosition;
