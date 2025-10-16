@@ -16,6 +16,8 @@ public class UnitManager : MonoBehaviour
     private Vector2 _endMousePosition;
 
     private Rect selectionRect;
+    private SelectedType _selectedType;
+    private GameObject _enemy;
 
     private void Start()
     {
@@ -35,13 +37,26 @@ public class UnitManager : MonoBehaviour
             switch (_raycastHit.collider.gameObject.tag)
             {
                 case "Player":
-                    if (_raycastHit.collider.gameObject.TryGetComponent<Unit>(out var unit))
+                    if (_raycastHit.collider.gameObject.TryGetComponent<Unit>(out Unit unit))
                     {
                         if (_selectUnits.Contains(unit))
                         {
                             return;
                         }
                         _selectUnits.Add(unit);
+                        _selectedType = SelectedType.Player;
+                    }
+                    break;
+                case "Enemy":
+                    _enemy = _raycastHit.collider.gameObject;
+                    if(_selectedType == SelectedType.Player)
+                    {
+                        for(int i = 0; i < _selectUnits.Count; i++)
+                        {
+                            IState state = _selectUnits[i].GetComponent<IState>();
+                            state.SetState(StateType.Attack);
+                            _selectUnits[i].SetAttackTarget(_enemy);
+                        }
                     }
                     break;
                 case "Ground":
@@ -98,15 +113,30 @@ public class UnitManager : MonoBehaviour
 
         if (_selectUnits.Count > 0)
         {
-            var character = _selectUnits[0];
-            character.SetTargetPosition(_targetPosition);
-            for (int i = 1; i < _selectUnits.Count; i++)
+            var unit = _selectUnits[0];
+            unit.SetMoveType(MoveType.Parent);
+            unit.SetTargetPosition(_targetPosition);
+            unit.TryGetComponent<IState>(out IState state);
+            state.SetState(StateType.Move);
+            if(_selectUnits.Count > 1)
             {
-                _selectUnits[i].SetCharacter(character.gameObject);
-                _selectUnits[i].SetTargetPosition(_targetPosition);
-                character = _selectUnits[i];
+                for (int i = 1; i < _selectUnits.Count; i++)
+                {
+                    _selectUnits[i].SetMoveType(MoveType.Child);
+                    _selectUnits[i].SetFollowUnit(unit.transform);
+                    _selectUnits[i].SetTargetPosition(_targetPosition);
+                    _selectUnits[i].TryGetComponent<IState>(out state);
+                    state.SetState(StateType.Move);
+                    unit = _selectUnits[i];
+                }
             }
             _selectUnits.Clear();
         }
     }
+}
+
+public enum SelectedType
+{
+    Player,
+    Enemy,
 }
