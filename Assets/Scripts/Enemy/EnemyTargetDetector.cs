@@ -9,7 +9,7 @@ public class EnemyTargetDetector : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            IUnit unit = other.gameObject.GetComponentInParent<IUnit>();
+            IDamage unit = other.gameObject.GetComponentInParent<IDamage>();
             _enemy.SetAttackTarget(other.gameObject.transform.position, unit);
         }
     }
