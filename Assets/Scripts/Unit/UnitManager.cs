@@ -16,7 +16,7 @@ public class UnitManager : MonoBehaviour
     private Vector2 _endMousePosition;
 
     private Rect selectionRect;
-    private SelectedType _selectedType;
+    private CharacterType _selectedType;
     private GameObject _enemy;
 
     private void Start()
@@ -44,12 +44,12 @@ public class UnitManager : MonoBehaviour
                             return;
                         }
                         _selectUnits.Add(unit);
-                        _selectedType = SelectedType.Player;
+                        _selectedType = CharacterType.Player;
                     }
                     break;
                 case "Enemy":
                     _enemy = _raycastHit.collider.gameObject;
-                    if (_selectedType == SelectedType.Player)
+                    if (_selectedType == CharacterType.Player)
                     {
                         for (int i = 0; i < _selectUnits.Count; i++)
                         {
@@ -135,7 +135,7 @@ public class UnitManager : MonoBehaviour
     }
 }
 
-public enum SelectedType
+public enum CharacterType
 {
     Player,
     Enemy,
