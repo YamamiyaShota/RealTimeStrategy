@@ -49,9 +49,9 @@ public class UnitManager : MonoBehaviour
                     break;
                 case "Enemy":
                     _enemy = _raycastHit.collider.gameObject;
-                    if(_selectedType == SelectedType.Player)
+                    if (_selectedType == SelectedType.Player)
                     {
-                        for(int i = 0; i < _selectUnits.Count; i++)
+                        for (int i = 0; i < _selectUnits.Count; i++)
                         {
                             IState state = _selectUnits[i].GetComponent<IState>();
                             state.SetState(StateType.Attack);
@@ -82,10 +82,10 @@ public class UnitManager : MonoBehaviour
 
         selectionRect = new Rect(x, y, width, height);
 
-        FIndSelectionsUnit(selectionRect);
+        SelectUnitsInRect(selectionRect);
     }
 
-    private void FIndSelectionsUnit(Rect selection)
+    private void SelectUnitsInRect(Rect selection)
     {
         foreach (var agent in _agents)
         {
@@ -118,7 +118,7 @@ public class UnitManager : MonoBehaviour
             unit.SetTargetPosition(_targetPosition);
             unit.TryGetComponent<IState>(out IState state);
             state.SetState(StateType.Move);
-            if(_selectUnits.Count > 1)
+            if (_selectUnits.Count > 1)
             {
                 for (int i = 1; i < _selectUnits.Count; i++)
                 {
